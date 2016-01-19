@@ -20,6 +20,9 @@ exports.create = function (req, res) {
 	var sendShipper = req.body.sendShipper;
 	var receiver = req.body.receiver;
 	var goodCategory = req.body.goodCategory;
+	var orderStatus = req.body.orderStatus;
+
+	var date = {createDate: new Date()};
 
 	if (!sendShipper) {
 		return res.json(400, {error: {msg: 'sendShipper is required'}});
@@ -29,6 +32,13 @@ exports.create = function (req, res) {
 	}
 	if (!goodCategory) {
 		return res.json(400, {error: {msg: 'goodCategory is required'}});
+	}
+	if (!orderStatus) {
+		return res.json(400, {error: {msg: 'orderStatus is required'}});
+	}
+
+	if (orderStatus == 'submited') {
+		_.assign(date, {submitedTime: new Date()});
 	}
 
 	Userinfo.findById(sendShipper, function (err, userInfo) {
@@ -40,7 +50,7 @@ exports.create = function (req, res) {
 		}
 		console.log('userInfo is found');
 
-		Order.create(_.assign(req.body, {createDate: new Date()}), function (err, order) {
+		Order.create(_.assign(req.body, date), function (err, order) {
 			if (err) {
 				return handleError(res, err);
 			}
@@ -67,19 +77,20 @@ exports.update = function (req, res) {
 
 		switch (status) {
 		case 'submited':
-			orderStatus = {status: status, submitedTime: new Date};
+			orderStatus = {orderStatus: status, submitedTime: new Date};
 			break;
 		case 'received':
-			orderStatus = {status: status, receivedTime: new Date};
+			orderStatus = {orderStatus: status, receivedTime: new Date};
+			console.log(orderStatus);
 			break;
 		case 'delivered':
-			orderStatus = {status: status, deliveredTime: new Date};
+			orderStatus = {orderStatus: status, deliveredTime: new Date};
 			break;
 		case 'finished':
-			orderStatus = {status: status, finishTime: new Date};
+			orderStatus = {orderStatus: status, finishTime: new Date};
 			break;
 		case 'cancel':
-			orderStatus = {status: status};
+			orderStatus = {orderStatus: status};
 			break;
 		default:
 			return res.json(400, {error: {msg: 'status is wrong'}});

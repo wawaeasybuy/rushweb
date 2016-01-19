@@ -17,8 +17,8 @@ function handleError(res, err) {
 // create evaluation
 exports.create = function (req, res) {
 
-	var orderId = req.body.orderId;
-	var userInfoId = req.body.userInfoId;
+	var orderId = req.body._order;
+	var userInfoId = req.body._userInfo;
 	var comment = req.body.comment;
 	var score = req.body.score;
 

@@ -14,8 +14,8 @@ var UserSchema = new Schema({
   idCard: String,
   credentialsPhoto: String,
   isPass: {
-    type: Boolean, 
-    default: false
+    type: Number, 
+    default: 1
   },
   _userInfo: {
     type: String,

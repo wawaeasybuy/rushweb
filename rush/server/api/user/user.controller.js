@@ -1,6 +1,7 @@
 'use strict';
 
 import User from './user.model';
+import Userinfo from '../userinfo/userinfo.model';
 import passport from 'passport';
 import config from '../../config/environment';
 import jwt from 'jsonwebtoken';
@@ -111,13 +112,22 @@ export function changePassword(req, res, next) {
  */
 export function me(req, res, next) {
   var userId = req.user._id;
+  var userInfoId = req.user._userInfo;
 
   User.findOneAsync({ _id: userId }, '-salt -password')
     .then(user => { // don't ever give out the password or salt
       if (!user) {
         return res.status(401).end();
       }
-      res.json(user);
+      Userinfo.findById(userInfoId, function (err, userInfo) {
+        if (!userInfo) {
+          return res.json(404, {error: {msg: 'userInfo is not found'}});
+        }
+        res.json(200, {
+          user: user,
+          userInfo: userInfo
+        });
+      });
     })
     .catch(err => next(err));
 }
