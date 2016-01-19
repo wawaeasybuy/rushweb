@@ -9,6 +9,11 @@ var validationError = function(res, err) {
 	return res.json(422, err);
 };
 
+var averageScore = function (score1, score2) {
+	var score = score1 * 0.7 + score2 * 0.3;
+	return score.toFixed(2);
+};
+
 function handleError(res, err) {
 	return res.json(500, err);
 };
@@ -57,13 +62,15 @@ exports.create = function (req, res) {
 				}
 				console.log('has create evaluation');
 
-				var currentScore = evaluation.score;
+				var newScore = evaluation.score;
 
 				Userinfo.findById(userInfoId, function (err, userInfo2) {
 					if (err) {
 						return handleError(res, err);
 					}
-					var updateUserInfo = _.assign(userInfo2, {score: currentScore});
+					var existedScore = userInfo2.score;
+
+					var updateUserInfo = _.assign(userInfo2, {score: averageScore(existedScore, newScore)});
 					updateUserInfo.save(function (err, result) {
 						if (err) {
 							return handleError(res, err);

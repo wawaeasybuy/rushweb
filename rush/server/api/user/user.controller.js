@@ -5,6 +5,7 @@ import Userinfo from '../userinfo/userinfo.model';
 import passport from 'passport';
 import config from '../../config/environment';
 import jwt from 'jsonwebtoken';
+import _ from 'lodash';
 
 function validationError(res, statusCode) {
   statusCode = statusCode || 422;
@@ -59,18 +60,33 @@ export function create(req, res, next) {
 /**
  * Get a single user
  */
-export function show(req, res, next) {
+// export function show(req, res, next) {
+//   var userId = req.params.id;
+
+//   User.findByIdAsync(userId)
+//     .then(user => {
+//       if (!user) {
+//         return res.status(404).end();
+//       }
+//       res.json(user.profile);
+//     })
+//     .catch(err => next(err));
+// }
+
+exports.show = function (req, res) {
   var userId = req.params.id;
 
-  User.findByIdAsync(userId)
-    .then(user => {
-      if (!user) {
-        return res.status(404).end();
-      }
-      res.json(user.profile);
-    })
-    .catch(err => next(err));
-}
+  User.findById(userId, function (err, user) {
+    if (err) {
+      return handleError(res, 500);
+    }
+    if (!user) {
+      return res.json(404, {error: {msg: 'user is not found'}});
+    }
+    res.json(200, user);
+
+  });
+};
 
 /**
  * Deletes a user
@@ -140,4 +156,58 @@ export function authCallback(req, res, next) {
 }
 
 
+exports.submitIdentity = function (req, res) {
+  var idCard = req.body.idCard;
+  var credentialsPhoto = req.body.credentialsPhoto;
 
+  var userId = req.user._id;
+
+  if (!idCard) {
+    return res.json(400, {error: {msg: 'idCard is required'}});
+  }
+  // if (!credentialsPhoto) {
+  //   return res.json(400, {error: {msg: 'credentialsPhoto is required'}});
+  // }
+  User.findById(userId, function (err, user) {
+    if (err) {
+      return handleError(res, 500);
+    }
+    if (!user) {
+      return res.json(404, {error: {msg: 'user is not found'}});
+    }
+    var updateUser = _.assign(user, req.body);
+    _.assign(updateUser, {isPass: 1});
+    updateUser.save(function (err, result) {
+      if (err) {
+        return handleError(res, 500);
+      }
+      res.json(200, result);
+    });
+  });
+};
+
+
+exports.checkIdentity = function (req, res) {
+  var userId = req.params.id;
+  var isPass = req.body.isPass;
+
+  if (!isPass) {
+    return res.json(400, {error: {msg: 'isPass is required'}});
+  }
+
+  User.findById(userId, function (err, user) {
+    if (err) {
+      return handleError(res, 500);
+    }
+    if (!user) {
+      return res.json(404, {error: {msg: 'user is required'}});
+    }
+    var updateUser = _.assign(user, {isPass: isPass});
+    updateUser.save(function (err, result) {
+      if (err) {
+        return handleError(res, 500);
+      }
+      res.json(200, result);
+    });
+  });
+};
