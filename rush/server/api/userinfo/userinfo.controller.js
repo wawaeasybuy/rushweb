@@ -80,7 +80,7 @@ exports.create = function (req, res) {
 					console.log('create wallet success');
 
 					res.json(200, {
-						user: user,
+						account: user.account,
 						userInfo: userInfo,
 						wallet: wallet
 					});
