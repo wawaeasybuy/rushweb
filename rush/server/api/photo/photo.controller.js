@@ -11,24 +11,24 @@ function handleError(res, err) {
 var storage = multer.diskStorage({
     destination: function (req, file, callback) {
         console.log('b');
-        callback(null, './uploads');
+        console.log(__dirname);
+        callback(null, __dirname + '/uploads');
     },
     filename: function (req, file, callback) {
+        console.log('b');
         callback(null, file.fieldname + '-' + Date.now());
     }
 });
 
-var upload = multer({dest: 'photo/good/'}).single('good');
-// var upload = multer().single('good');
+// var upload = multer({dest: 'photo/good/'}).single('good');
+var upload = multer({storage: storage}).single('good');
 
 exports.uploadGood = function (req, res) {
 
     upload(req, res, function(err) {
-        console.log('a');
         if (err) {
             return handleError(res, err);
         }
-        console.log('a');
         res.json(200, {msg: "File is uploaded"});
     });
 };
